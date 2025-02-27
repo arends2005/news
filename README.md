@@ -1,45 +1,74 @@
-# news
-Program to store URLs of news articles I find interesting for later reading
+# News Article Saver
 
-Coding on github with 2 different accounts
-Don't use --global  --> git config in the cloned directory, see below
-git config --global --list
+## Overview
+The News Article Saver is a web application that allows users to save URLs of news articles for later reading. Users can manage their saved articles by adding new URLs, updating notes associated with each article, and deleting articles they no longer wish to keep. The articles are displayed in a list ordered by the date they were added.
 
+## Features
+- Save URLs of news articles
+- Update notes for each article
+- Delete articles from the list
+- Articles displayed in order of creation date
+- Responsive design using Bootstrap
 
-# First create the keys
-ssh-keygen -t rsa -b 4096 -C "chrisarends09@gmail.com" -f ~/.ssh/id_rsa_chris
-ssh-keygen -t rsa -b 4096 -C "arendsam@oregonstate.edu" -f ~/.ssh/id_rsa_amelia
+## Technologies Used
+- Node.js with Express framework
+- PostgreSQL for the database
+- EJS for templating
+- Bootstrap for styling
+- Docker for containerization
 
-eval "$(ssh-agent -s)"
+## Project Structure
+```
+news-article-saver
+├── src
+│   ├── app.js
+│   ├── controllers
+│   │   └── index.js
+│   ├── models
+│   │   └── article.js
+│   ├── routes
+│   │   └── index.js
+│   ├── views
+│   │   ├── index.ejs
+│   │   └── layout.ejs
+│   └── public
+│       ├── css
+│       │   └── styles.css
+│       └── js
+│           └── scripts.js
+├── Dockerfile
+├── docker-compose.yml
+├── package.json
+├── README.md
+└── .env
+```
 
-ssh-add ~/.ssh/id_rsa_chris
-ssh-add ~/.ssh/id_rsa_amelia
-ssh-add -l
+## Setup Instructions
+1. Clone the repository:
+   ```
+   git clone <repository-url>
+   cd news-article-saver
+   ```
 
-# Add the keys to respective github accounts
-cat ~/.ssh/id_rsa_chris.pub
-cat ~/.ssh/id_rsa_amelia.pub
+2. Create a `.env` file in the root directory and add your database connection details:
+   ```
+   DATABASE_URL=postgres://username:password@db:5432/news_article_saver
+   ```
 
-# ################################################
-# Create a config file
-ls -la ~/.ssh
-nano ~/.ssh/config
+3. Build and run the application using Docker:
+   ```
+   docker-compose up --build
+   ```
 
-Host github.com-chrisarends09
-    HostName github.com
-    User git
-    IdentityFile ~/.ssh/id_rsa_chris
+4. Access the application at `http://localhost:3000`.
 
-Host github.com-arends2005
-    HostName github.com
-    User git
-    IdentityFile ~/.ssh/id_rsa_amelia
-# ###############################################
+## Usage
+- To add a new article, enter the URL and notes in the provided form and submit.
+- The list of articles will display the URLs along with their associated notes and the date they were added.
+- You can update notes or delete articles directly from the list.
 
-# Clone into local host machine
-git clone git@github.com-arends2005:arends2005/news.git
-# Add git info into the local folder
-git config user.name "arends2005"
-git config user.email "arendsam@oregonstate.edu"
+## Contributing
+Contributions are welcome! Please feel free to submit a pull request or open an issue for any suggestions or improvements.
 
-git config --local --list
+## License
+This project is licensed under the MIT License.

@@ -1,0 +1,27 @@
+news-article-saver
+├── src
+│   ├── app.js
+│   ├── logger.js
+│   ├── controllers
+│   │   ├── articleController.js
+│   │   ├── categoryController.js
+│   │   └── index.js
+│   ├── models
+│   │   └── article.js
+│   ├── routes
+│   │   ├── index.js
+│   │   └── categoryRoutes.js
+│   ├── views
+│   │   └── index.ejs
+│   └── public
+│       ├── css
+│       │   └── styles.css
+│       └── js
+│           └── scripts.js
+├── Dockerfile
+├── docker-compose.yml
+├── package.json
+├── README.md
+├── .env
+├── .env.sample
+└── .gitignore
