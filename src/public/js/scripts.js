@@ -378,19 +378,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Function to handle delete
   function handleDelete(event) {
     event.preventDefault();
-    event.stopPropagation(); // Add this to prevent event bubbling
+    event.stopPropagation();
     
     const button = event.currentTarget;
-    
-    // Remove the event listener immediately to prevent double-clicks
-    button.removeEventListener('click', handleDelete);
-    
-    if (!confirm('Are you sure you want to delete this article?')) {
-      // Re-add the event listener if user cancels
-      button.addEventListener('click', handleDelete);
-      return;
-    }
-    
     const articleItem = button.closest('.article-item');
     const articleId = articleItem.dataset.id;
     
@@ -399,27 +389,45 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
     
+    if (!confirm('Are you sure you want to delete this article?')) {
+      return;
+    }
+    
     // Disable the delete button immediately
     button.disabled = true;
     
-    // Remove the article from UI immediately
-    const countBadge = document.querySelector('.card-header .badge');
-    const currentCount = parseInt(countBadge.textContent);
-    countBadge.textContent = `${currentCount - 1} articles`;
-    articleItem.remove();
-    
-    // Then send the delete request to the server
+    // Send the delete request to the server
     fetch(`/articles/${articleId}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: {
+        'Accept': 'application/json'
+      }
     })
     .then(response => {
-      if (!response.ok && response.status !== 404) {
-        throw new Error('Failed to delete article');
+      if (!response.ok) {
+        return response.json().then(data => {
+          throw new Error(data.error || 'Failed to delete article');
+        });
+      }
+      return response.json();
+    })
+    .then(data => {
+      if (data.success) {
+        // Only remove from UI if server deletion was successful
+        const countBadge = document.querySelector('.card-header .badge');
+        if (countBadge) {
+          const currentCount = parseInt(countBadge.textContent) || 0;
+          countBadge.textContent = `${currentCount - 1} articles`;
+        }
+        articleItem.remove();
+      } else {
+        throw new Error(data.error || 'Failed to delete article');
       }
     })
     .catch(error => {
       console.error('Error:', error);
-      // If there's an error, we don't need to show it to the user since the article is already removed from UI
+      alert(error.message || 'Failed to delete article. Please try again.');
+      button.disabled = false;
     });
   }
 
@@ -559,9 +567,10 @@ document.addEventListener('DOMContentLoaded', () => {
   function initializeDeleteButtons() {
     document.querySelectorAll('.delete-btn').forEach(button => {
       // Remove any existing event listeners first
-      button.removeEventListener('click', handleDelete);
-      // Add the event listener
-      button.addEventListener('click', handleDelete);
+      const newButton = button.cloneNode(true);
+      button.parentNode.replaceChild(newButton, button);
+      
+      newButton.addEventListener('click', handleDelete);
     });
   }
 

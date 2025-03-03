@@ -194,6 +194,9 @@ const deleteArticle = (pool) => async (req, res) => {
     
     logger.info(`Deleting article with ID: ${id}`);
     
+    // Start a transaction
+    await pool.query('BEGIN');
+    
     // First check if the article exists
     const checkResult = await pool.query(
       'SELECT id FROM articles WHERE id = $1',
@@ -201,22 +204,35 @@ const deleteArticle = (pool) => async (req, res) => {
     );
     
     if (checkResult.rows.length === 0) {
+      await pool.query('ROLLBACK');
       logger.info(`Article with ID ${id} not found (already deleted)`);
       return res.status(404).json({ success: false, error: 'Article not found or already deleted' });
     }
     
+    // Delete article categories first
+    await pool.query(
+      'DELETE FROM article_categories WHERE article_id = $1',
+      [id]
+    );
+    
+    // Then delete the article
     const result = await pool.query(
       'DELETE FROM articles WHERE id = $1 RETURNING *',
       [id]
     );
     
     if (result.rows.length === 0) {
+      await pool.query('ROLLBACK');
       return res.status(404).json({ success: false, error: 'Article not found' });
     }
+    
+    // Commit the transaction
+    await pool.query('COMMIT');
     
     logger.info(`Article with ID ${id} deleted successfully`);
     res.json({ success: true, message: 'Article deleted successfully' });
   } catch (err) {
+    await pool.query('ROLLBACK');
     logger.error(`Error deleting article: ${err}`);
     res.status(500).json({ success: false, error: 'Failed to delete article' });
   }
