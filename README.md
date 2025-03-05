@@ -9,6 +9,10 @@ The News Article Saver is a web application that allows users to save URLs of ne
 - Delete articles from the list
 - Articles displayed in order of creation date
 - Responsive design using Bootstrap
+- Category management for articles
+- Admin account for system management
+- Discord bot integration for article sharing
+- Secure session management
 
 ## Technologies Used
 - Node.js with Express framework
@@ -16,21 +20,26 @@ The News Article Saver is a web application that allows users to save URLs of ne
 - EJS for templating
 - Bootstrap for styling
 - Docker for containerization
+- Discord.js for bot integration
+- Winston for logging
 
 ## Project Structure
 ```
 news-article-saver
 ├── src
 │   ├── app.js
+│   ├── logger.js
 │   ├── controllers
+│   │   ├── articleController.js
+│   │   ├── categoryController.js
 │   │   └── index.js
 │   ├── models
 │   │   └── article.js
 │   ├── routes
-│   │   └── index.js
+│   │   ├── index.js
+│   │   └── categoryRoutes.js
 │   ├── views
-│   │   ├── index.ejs
-│   │   └── layout.ejs
+│   │   └── index.ejs
 │   └── public
 │       ├── css
 │       │   └── styles.css
@@ -40,7 +49,9 @@ news-article-saver
 ├── docker-compose.yml
 ├── package.json
 ├── README.md
-└── .env
+├── .env
+├── .env.sample
+└── .gitignore
 ```
 
 ## Setup Instructions
@@ -50,10 +61,16 @@ news-article-saver
    cd news-article-saver
    ```
 
-2. Create a `.env` file in the root directory and add your database connection details:
+2. Copy the `.env.sample` file to `.env` and configure your environment variables:
    ```
-   DATABASE_URL=postgres://username:password@db:5432/news_article_saver
+   cp .env.sample .env
    ```
+   Make sure to set up:
+   - Database configuration
+   - Admin account credentials
+   - Discord bot token and permissions
+   - Session secret
+   - Invite code
 
 3. Build and run the application using Docker:
    ```
@@ -63,9 +80,11 @@ news-article-saver
 4. Access the application at `http://localhost:3000`.
 
 ## Usage
-- To add a new article, enter the URL and notes in the provided form and submit.
-- The list of articles will display the URLs along with their associated notes and the date they were added.
-- You can update notes or delete articles directly from the list.
+- To add a new article, enter the URL and notes in the provided form and submit
+- The list of articles will display the URLs along with their associated notes and the date they were added
+- You can update notes or delete articles directly from the list
+- Use categories to organize your articles
+- The Discord bot can be used to share articles directly from Discord
 
 ## Contributing
 Contributions are welcome! Please feel free to submit a pull request or open an issue for any suggestions or improvements.

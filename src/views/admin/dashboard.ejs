@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - News Article Saver</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --text-primary: #0d6efd;
+            --text-secondary: #0d6efd;
+            --text-muted: #0d6efd;
+            --bg-primary: #212529;
+            --bg-secondary: #343a40;
+            --border-color: #495057;
+        }
+        
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        
+        .admin-container {
+            padding: 20px;
+            max-width: 100%;
+            margin: 0;
+            color: var(--text-primary);
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .admin-header h1 {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .admin-header .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .admin-header .nav-buttons .btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        
+        .stat-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .users-list {
+            display: grid;
+            gap: 20px;
+        }
+        
+        .user-card {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            border: 1px solid var(--border-color);
+        }
+        
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .user-info h5 {
+            margin: 0;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        
+        .badge {
+            font-size: 12px;
+            padding: 4px 8px;
+            margin-left: 8px;
+            font-weight: 500;
+        }
+        
+        .badge-admin {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .badge-user {
+            background-color: var(--text-primary);
+            color: white;
+        }
+        
+        .user-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .modal-content {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+        }
+        
+        .modal-header {
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem;
+        }
+        
+        .modal-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 1rem;
+        }
+        
+        .modal-title {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+            color: var(--text-primary);
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+            color: var(--text-primary);
+        }
+        
+        .card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+        }
+        
+        .card-header {
+            background-color: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem;
+        }
+        
+        .card-header h5 {
+            margin: 0;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        .card-body {
+            padding: 1.25rem;
+            color: var(--text-primary);
+        }
+        
+        .form-label {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control {
+            background-color: var(--bg-primary);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+            padding: 0.5rem 0.75rem;
+            font-size: 1rem;
+        }
+        
+        .form-control:focus {
+            background-color: var(--bg-primary);
+            border-color: var(--text-primary);
+            color: var(--text-primary);
+            box-shadow: 0 0 0 0.2rem rgba(13,110,253,.25);
+        }
+        
+        .text-muted {
+            color: var(--text-primary) !important;
+        }
+        
+        .alert {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            max-width: 800px;
+            margin-left: 0;
+            margin-right: 0;
+            text-align: left;
+        }
+        
+        .alert-danger {
+            background-color: #dc3545;
+            border-color: #ebebeb;
+            color: white;
+        }
+        
+        .alert-success {
+            background-color: #198754;
+            border-color: #ffffff;
+            color: white;
+        }
+        
+        .alert-info {
+            background-color: #ec9c07;
+            border-color: #ffffff;
+            color: white;
+        }
+        
+        .btn-close {
+            filter: invert(1) grayscale(100%) brightness(200%);
+        }
+        
+        p, small {
+            color: var(--text-primary) !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <div class="admin-header">
+            <h1>Admin Dashboard</h1>
+            <div class="nav-buttons">
+                <a href="/" class="btn btn-outline-primary">
+                    <i class="fas fa-newspaper"></i> News Articles
+                </a>
+                <a href="/auth/logout" class="btn btn-outline-danger">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+            </div>
+        </div>
+
+        <div class="alert alert-info">
+            Currently logged in as: <strong><%= locals.user.username %></strong> (ID: <%= locals.user.id %>)
+        </div>
+
+        <% if (messages.error) { %>
+            <div class="alert alert-danger"><%= messages.error %></div>
+        <% } %>
+        <% if (messages.success) { %>
+            <div class="alert alert-success"><%= messages.success %></div>
+        <% } %>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number"><%= users.length %></div>
+                <div class="stat-label">Total Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><%= users.filter(u => u.is_admin).length %></div>
+                <div class="stat-label">Admin Users</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number"><%= users.reduce((sum, u) => sum + parseInt(u.article_count), 0) %></div>
+                <div class="stat-label">Total Articles</div>
+            </div>
+        </div>
+
+        <!-- Admin Password Update Form -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Update The Admin Password of the Currently logged in user</h5>
+            </div>
+            <div class="card-body">
+                <form action="/admin/update-password" method="POST">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="currentPassword" class="form-label">Current Password</label>
+                                <input type="password" class="form-control" id="currentPassword" name="currentPassword" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label for="newPassword" class="form-label">New Password</label>
+                                <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary">Update Password</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Bot User ID Update Form -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Update Discord Bot User</h5>
+            </div>
+            <div class="card-body">
+                <form action="/admin/update-bot-user" method="POST">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="mb-3">
+                                <label for="botUserId" class="form-label">Select User for Discord Bot Articles</label>
+                                <select class="form-control" id="botUserId" name="botUserId" required>
+                                    <% users.forEach(user => { %>
+                                        <option value="<%= user.id %>" <%= user.id === currentBotUserId ? 'selected' : '' %>>
+                                            <%= user.username %> (ID: <%= user.id %>)
+                                        </option>
+                                    <% }); %>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary">Update Bot User</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="users-list">
+            <% users.forEach(user => { %>
+                <div class="user-card">
+                    <div class="user-header">
+                        <div class="user-info">
+                            <h5 class="mb-1">
+                                <%= user.username %>
+                                <span class="badge <%= user.is_admin ? 'badge-admin' : 'badge-user' %>">
+                                    <%= user.is_admin ? 'Admin' : 'User' %>
+                                </span>
+                            </h5>
+                            <p class="mb-1 text-muted">ID: <%= user.id %> | <%= user.email %></p>
+                            <small class="text-muted">
+                                Joined: <%= new Date(user.created_at).toLocaleDateString() %>
+                                | Articles: <%= user.article_count %>
+                            </small>
+                        </div>
+                        <div class="user-actions">
+                            <% if (user.id !== locals.user.id) { %>
+                                <button class="btn btn-sm btn-outline-primary" 
+                                        onclick="showResetPasswordModal('<%= user.id %>', '<%= user.username %>')">
+                                    <i class="fas fa-key"></i> Reset Password
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning" 
+                                        onclick="showToggleAdminModal('<%= user.id %>', '<%= user.username %>', <%= user.is_admin %>)">
+                                    <i class="fas fa-user-shield"></i> <%= user.is_admin ? 'Remove Admin' : 'Make Admin' %>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" 
+                                        onclick="showDeleteModal('<%= user.id %>', '<%= user.username %>')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+
+    <!-- Reset Password Modal -->
+    <div class="modal fade" id="resetPasswordModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reset Password</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="resetPasswordForm" method="POST">
+                    <div class="modal-body">
+                        <p>Enter new password for <span id="resetPasswordUsername"></span>:</p>
+                        <input type="password" name="newPassword" class="form-control" required>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Reset Password</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toggle Admin Modal -->
+    <div class="modal fade" id="toggleAdminModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Toggle Admin Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to <span id="toggleAdminAction"></span> for <span id="toggleAdminUsername"></span>?</p>
+                </div>
+                <div class="modal-footer">
+                    <form id="toggleAdminForm" method="POST">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-warning">Confirm</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete User Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete <span id="deleteUsername"></span>? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <form id="deleteForm" method="POST">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize modals
+        const resetPasswordModal = new bootstrap.Modal(document.getElementById('resetPasswordModal'));
+        const toggleAdminModal = new bootstrap.Modal(document.getElementById('toggleAdminModal'));
+        const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+
+        // Reset Password Modal
+        function showResetPasswordModal(userId, username) {
+            document.getElementById('resetPasswordUsername').textContent = username;
+            document.getElementById('resetPasswordForm').action = `/admin/users/${userId}/reset-password`;
+            resetPasswordModal.show();
+        }
+
+        // Toggle Admin Modal
+        function showToggleAdminModal(userId, username, isAdmin) {
+            document.getElementById('toggleAdminUsername').textContent = username;
+            document.getElementById('toggleAdminAction').textContent = isAdmin ? 'remove admin status' : 'grant admin status';
+            document.getElementById('toggleAdminForm').action = `/admin/users/${userId}/toggle-admin`;
+            toggleAdminModal.show();
+        }
+
+        // Delete Modal
+        function showDeleteModal(userId, username) {
+            document.getElementById('deleteUsername').textContent = username;
+            document.getElementById('deleteForm').action = `/admin/users/${userId}/delete`;
+            deleteModal.show();
+        }
+    </script>
+</body>
+</html> 

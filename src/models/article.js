@@ -20,8 +20,10 @@ const createArticleTable = async (pool) => {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS categories (
         id SERIAL PRIMARY KEY,
-        name TEXT UNIQUE NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        name TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, name)
       )
     `);
 
@@ -42,6 +44,7 @@ const createArticleTable = async (pool) => {
         notes TEXT,
         favorite BOOLEAN DEFAULT false,
         display_order INTEGER,
+        user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
@@ -54,11 +57,16 @@ const createArticleTable = async (pool) => {
       'Python', 'Git', 'Crypto'
     ];
 
-    for (const category of defaultCategories) {
-      await pool.query(
-        'INSERT INTO categories (name) VALUES ($1) ON CONFLICT (name) DO NOTHING',
-        [category]
-      );
+    // Get the first user (user 1) to assign default categories to
+    const userResult = await pool.query('SELECT id FROM users ORDER BY id ASC LIMIT 1');
+    if (userResult.rows.length > 0) {
+      const userId = userResult.rows[0].id;
+      for (const category of defaultCategories) {
+        await pool.query(
+          'INSERT INTO categories (user_id, name) VALUES ($1, $2) ON CONFLICT (user_id, name) DO NOTHING',
+          [userId, category]
+        );
+      }
     }
 
     // Add columns if they don't exist (for existing tables)

@@ -1,0 +1,6 @@
+-- Create settings table
+CREATE TABLE IF NOT EXISTS settings (
+    key VARCHAR(255) PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+); 

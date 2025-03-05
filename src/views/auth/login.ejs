@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - News Article Saver</title>
+    <style>
+        body {
+            font-family: "Bitstream Vera Sans", Tahoma, sans-serif;
+            font-size: 11px;
+            color: rgb(185, 185, 185);
+            background: linear-gradient(-45deg, rgb(103, 19, 22), rgb(26, 26, 26), rgb(26, 26, 26), rgb(26, 26, 26)) 0% 0% / 400% 400%;
+            animation: 15s ease 0s infinite normal none running gradient;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .login-container {
+            background: rgba(26, 26, 26, 0.9);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(103, 19, 22, 0.3);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid rgba(103, 19, 22, 0.3);
+            margin: 2rem auto;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #fff;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            padding: 0 1rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #fff;
+            text-align: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid rgba(103, 19, 22, 0.5);
+            background: rgba(26, 26, 26, 0.8);
+            color: #fff;
+            border-radius: 4px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: rgb(103, 19, 22);
+            box-shadow: 0 0 5px rgba(103, 19, 22, 0.3);
+        }
+
+        button {
+            width: calc(100% - 2rem);
+            padding: 0.8rem;
+            background: rgb(103, 19, 22);
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+            margin: 0 1rem;
+        }
+
+        button:hover {
+            background: rgb(123, 29, 32);
+        }
+
+        .error-message {
+            color: #ff4444;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .register-link a {
+            color: rgb(103, 19, 22);
+            text-decoration: none;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+        .copyright {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .users-count {
+            text-align: center;
+            margin-top: 0.5rem;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Login</h1>
+        </div>
+        
+        <% if (messages.error) { %>
+            <div class="error-message"><%= messages.error %></div>
+        <% } %>
+
+        <form action="/auth/login" method="POST">
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+
+            <button type="submit">Login</button>
+        </form>
+
+        <div class="register-link">
+            Don't have an account? <a href="/auth/register">Register here</a>
+        </div>
+
+        <div class="copyright">
+            © <%= new Date().getFullYear() %> News Article Saver. All rights reserved.
+        </div>
+
+        <div class="users-count">
+            <%= userCount %> registered users
+        </div>
+    </div>
+</body>
+</html> 

@@ -1,3 +1,6 @@
+// Initialize selectedCategories Set
+let selectedCategories = new Set();
+
 document.addEventListener('DOMContentLoaded', () => {
   // Prevent dropdown from closing when clicking inside
   $(document).on('click', '.dropdown-menu', function (e) {
@@ -7,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize dropdown
   $('.dropdown-toggle').dropdown();
 
-  function initializeAddArticleForm() {
+  async function initializeAddArticleForm() {
     const addArticleForm = document.querySelector('#add-article-form');
     if (addArticleForm) {
       // Prevent dropdown from closing when clicking inside the form
@@ -18,15 +21,17 @@ document.addEventListener('DOMContentLoaded', () => {
       // Handle form submission
       addArticleForm.addEventListener('submit', async function(event) {
         event.preventDefault();
-        event.stopPropagation();
         
-        // Get form data
+        const submitButton = this.querySelector('button[type="submit"]');
+        submitButton.disabled = true;
+        
         const url = this.querySelector('#url').value;
         const notes = this.querySelector('#notes').value;
         
-        // Disable submit button
-        const submitButton = this.querySelector('button[type="submit"]');
-        submitButton.disabled = true;
+        // Get selected categories from the form
+        const formCategories = Array.from(
+          this.querySelectorAll('.article-category:checked')
+        ).map(checkbox => parseInt(checkbox.value));
         
         try {
           const response = await fetch('/articles', {
@@ -35,11 +40,13 @@ document.addEventListener('DOMContentLoaded', () => {
               'Content-Type': 'application/json',
               'Accept': 'application/json'
             },
-            body: JSON.stringify({ url, notes })
+            body: JSON.stringify({ url, notes, categories: formCategories })
           });
           
-          if (!response.ok) {
-            throw new Error('Failed to save article');
+          const data = await response.json();
+          
+          if (!data.success) {
+            throw new Error(data.error || 'Failed to save article');
           }
           
           // Clear form
@@ -49,6 +56,12 @@ document.addEventListener('DOMContentLoaded', () => {
           $('#addArticleDropdown').dropdown('hide');
           $('.dropdown-menu').removeClass('show');
           
+          // Show success message
+          alert('Article saved successfully!');
+          
+          // Wait a moment for the server to process the new article
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
           // Refresh articles list
           const currentFilter = document.querySelector('#filterDropdown').dataset.value || 'all';
           const selectedCategories = Array.from(document.querySelectorAll('.category-filter:checked')).map(cb => cb.value);
@@ -56,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
           
         } catch (error) {
           console.error('Error:', error);
-          alert('Failed to save article');
+          alert(error.message || 'Failed to save article');
         } finally {
           submitButton.disabled = false;
         }
@@ -89,7 +102,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Handle category filter changes
   const categoryCheckboxes = document.querySelectorAll('.category-filter');
-  let selectedCategories = new Set();
 
   categoryCheckboxes.forEach(checkbox => {
     checkbox.addEventListener('change', async function() {
@@ -118,6 +130,46 @@ document.addEventListener('DOMContentLoaded', () => {
   const addCategoryModal = new bootstrap.Modal(document.getElementById('addCategoryModal'));
   const saveCategoryBtn = document.querySelector('#save-category-btn');
   const newCategoryInput = document.querySelector('#new-category-input');
+
+  // Handle export functionality
+  const exportItems = document.querySelectorAll('#exportDropdown + .dropdown-menu .dropdown-item');
+  exportItems.forEach(item => {
+    item.addEventListener('click', async function(event) {
+      event.preventDefault();
+      const format = this.dataset.format;
+      
+      try {
+        const response = await fetch(`/articles/export?format=${format}`);
+        
+        if (!response.ok) {
+          throw new Error('Failed to export articles');
+        }
+        
+        // Get the filename from the Content-Disposition header or use a default
+        const contentDisposition = response.headers.get('Content-Disposition');
+        const filename = contentDisposition
+          ? contentDisposition.split('filename=')[1].replace(/"/g, '')
+          : `articles.${format}`;
+        
+        // Create a blob from the response
+        const blob = await response.blob();
+        
+        // Create a download link and trigger the download
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to export articles');
+      }
+    });
+  });
 
   addCategoryBtn.addEventListener('click', (event) => {
     event.preventDefault();
@@ -212,11 +264,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to filter articles');
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Server returned non-JSON response');
       }
 
       const data = await response.json();
+      
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to filter articles');
+      }
       
       const articleList = document.getElementById('article-list');
       if (!articleList) {
@@ -320,7 +378,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to filter articles');
+      // Only show error message if it's not a "No articles found" case
+      if (error.message !== 'No articles found') {
+        // If the error is about non-JSON response, try refreshing the page
+        if (error.message === 'Server returned non-JSON response') {
+          window.location.reload();
+        } else {
+          alert('Failed to filter articles');
+        }
+      }
     }
   }
 
@@ -491,6 +557,10 @@ document.addEventListener('DOMContentLoaded', () => {
       return response.json();
     })
     .then(data => {
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to update article');
+      }
+      
       notesDisplay.textContent = notesText;
       articleItem.querySelector('.notes-display').style.display = 'block';
       articleItem.querySelector('.notes-edit').style.display = 'none';
@@ -499,6 +569,11 @@ document.addEventListener('DOMContentLoaded', () => {
       if (data.article.categories) {
         articleItem.dataset.categories = JSON.stringify(data.article.categories);
       }
+
+      // Refresh the article list to show updated categories
+      const currentFilter = document.querySelector('#filterDropdown').dataset.value || 'all';
+      const selectedCategories = Array.from(document.querySelectorAll('.category-filter:checked')).map(cb => cb.value);
+      return filterArticles(currentFilter, selectedCategories);
     })
     .catch(error => {
       console.error('Error:', error);

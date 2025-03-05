@@ -27,3 +27,18 @@ docker-compose.override.yml
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp

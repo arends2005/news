@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>News Article Saver</title>
+    <title>News Article Saver </title>
     <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -250,6 +250,11 @@
                             </div>
                         </div>
                     </li>
+                    <li class="nav-item">
+                        <a href="/auth/logout" class="btn btn-primary ml-2" style="background-color: #007BFF; border-color: #007BFF;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="addArticleDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <i class="fas fa-plus"></i> Add Article
@@ -264,8 +269,39 @@
                                     <label for="notes" class="form-label">Notes</label>
                                     <textarea class="form-control" id="notes" name="notes" rows="2" placeholder="Add your notes here..."></textarea>
                                 </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Categories:</label>
+                                    <div class="category-selection d-flex flex-wrap">
+                                        <% if (locals.categories && categories.length > 0) { %>
+                                            <% categories.forEach(category => { %>
+                                                <div class="form-check mr-3">
+                                                    <input class="form-check-input article-category" 
+                                                           type="checkbox" 
+                                                           value="<%= category.id %>"
+                                                           id="new-article-category-<%= category.id %>">
+                                                    <label class="form-check-label" for="new-article-category-<%= category.id %>">
+                                                        <%= category.name %>
+                                                    </label>
+                                                </div>
+                                            <% }); %>
+                                        <% } %>
+                                    </div>
+                                </div>
                                 <button type="submit" class="btn btn-primary btn-block">Save Article</button>
                             </form>
+                        </div>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="exportDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-download"></i> Export
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="#" data-format="json">
+                                <i class="fas fa-file-code"></i> Export as JSON
+                            </a>
+                            <a class="dropdown-item" href="#" data-format="markdown">
+                                <i class="fas fa-file-alt"></i> Export as Markdown
+                            </a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">

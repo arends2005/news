@@ -1,8 +1,9 @@
 const { Client, Events, GatewayIntentBits, Partials } = require('discord.js');
-const { Pool } = require('pg');
 const logger = require('../logger');
 const axios = require('axios');
 const cheerio = require('cheerio');
+const { getMetadata } = require('../utils/metadata');
+const pool = require('../db/pool');
 
 // Initialize Discord client with necessary intents
 const client = new Client({
@@ -19,10 +20,38 @@ const client = new Client({
   ]
 });
 
-// Initialize database connection pool
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL
-});
+// Get bot user ID from database or environment variable
+async function getBotUserId() {
+  try {
+    const result = await pool.query('SELECT value FROM settings WHERE key = $1', ['bot_user_id']);
+    if (result.rows.length > 0) {
+      return parseInt(result.rows[0].value);
+    }
+    // Fallback to environment variable
+    return parseInt(process.env.BOT_USER_ID) || 1;
+  } catch (err) {
+    logger.error('Error getting bot user ID:', err);
+    return parseInt(process.env.BOT_USER_ID) || 1;
+  }
+}
+
+let systemUserId = 1;
+
+// Function to get system user ID
+async function getSystemUserId() {
+  try {
+    systemUserId = await getBotUserId();
+    const result = await pool.query('SELECT id FROM users WHERE id = $1', [systemUserId]);
+    if (result.rows.length === 0) {
+      throw new Error('System user not found');
+    }
+    logger.info(`System user ID updated to: ${systemUserId}`);
+    return systemUserId;
+  } catch (err) {
+    logger.error('Error getting system user ID:', err);
+    throw err;
+  }
+}
 
 // URL regex pattern
 const urlPattern = /(https?:\/\/[^\s]+)/g;
@@ -70,93 +99,78 @@ client.once(Events.ClientReady, (c) => {
 // Handle message creation
 client.on(Events.MessageCreate, async (message) => {
   try {
-    // Log message received
-    logger.info(`Received message from ${message.author.username} in #${message.channel.name}: ${message.content}`);
-    
-    // Ignore messages from bots
+    // Ignore bot messages
     if (message.author.bot) {
       logger.debug('Ignoring message from bot');
       return;
     }
 
-    // Extract URLs from the message
+    logger.info(`Received message from ${message.author.username} in #${message.channel.name}: ${message.content}`);
+
+    // Extract URLs from message
     const urls = message.content.match(urlPattern);
     if (!urls) {
-      logger.debug('No URLs found in message');
       return;
     }
 
     logger.info(`Found ${urls.length} URLs in message`);
 
-    // Save each URL to the database
+    // Process each URL
     for (const url of urls) {
       try {
-        const timestamp = new Date();
-        const metadata = await fetchUrlMetadata(url);
-        const notes = `Submitted by ${message.author.username} in #${message.channel.name} at ${timestamp.toISOString()}\n\nTitle: ${metadata.title}\nDescription: ${metadata.description}`;
+        // Get metadata for the URL
+        const metadata = await getMetadata(url);
         
+        // Get the maximum display_order for the system user
+        const maxOrderResult = await pool.query(
+          'SELECT COALESCE(MAX(display_order), 0) as max_order FROM articles WHERE user_id = $1',
+          [systemUserId]
+        );
+        const newOrder = maxOrderResult.rows[0].max_order + 1;
+
+        // Save the article
         const result = await pool.query(
-          'INSERT INTO articles (url, notes) VALUES ($1, $2) RETURNING *',
-          [url, notes]
+          'INSERT INTO articles (url, notes, display_order, user_id) VALUES ($1, $2, $3, $4) RETURNING *',
+          [
+            url,
+            `Posted by ${message.author.username} in #${message.channel.name}\n${metadata.description || ''}`,
+            newOrder,
+            systemUserId
+          ]
         );
 
         logger.info(`Saved URL: ${url} from Discord message`);
-        
-        // React to the message to indicate success
+
+        // React to the message
         await message.react('✅');
-        
-        // Send a confirmation message with timestamp
-        const confirmationMsg = await message.reply(`URL saved to News Article Saver: ${url}\nSaved at: ${formatTimestamp(timestamp)}`);
-        
-        // Delete the original message after a short delay
-        try {
-          await new Promise(resolve => setTimeout(resolve, 3000)); // Wait 3 seconds
-          await message.delete();
-          logger.info('Original message deleted successfully');
-          
-          // Delete the confirmation message after another delay
-          await new Promise(resolve => setTimeout(resolve, 3000));
-          await confirmationMsg.delete();
-          logger.info('Confirmation message deleted successfully');
-        } catch (deleteError) {
-          logger.error('Error deleting messages:', deleteError);
-          // Don't throw the error - we still want to continue processing other URLs
-        }
-      } catch (err) {
-        if (err.code === '23505') { // Unique violation error code
-          logger.warn(`URL already exists: ${url}`);
-          await message.react('ℹ️');
-          const duplicateMsg = await message.reply(`This URL has already been saved.\nChecked at: ${formatTimestamp(new Date())}`);
-          
-          // Delete the duplicate message after a delay
+
+        // Send confirmation message
+        const timestamp = Math.floor(Date.now() / 1000);
+        const reply = await message.reply(`URL saved to News Article Saver: ${url}\nSaved at: <t:${timestamp}:F>`);
+
+        // Delete the original message and the reply after 5 seconds
+        setTimeout(async () => {
           try {
-            await new Promise(resolve => setTimeout(resolve, 3000));
-            await duplicateMsg.delete();
-          } catch (deleteError) {
-            logger.error('Error deleting duplicate message:', deleteError);
+            await message.delete();
+            await reply.delete();
+            logger.info('Deleted Discord messages');
+          } catch (err) {
+            logger.error('Error deleting Discord messages:', err);
           }
+        }, 5000);
+
+      } catch (err) {
+        if (err.code === '23505') { // Unique violation
+          logger.info(`URL already exists: ${url}`);
+          await message.react('⚠️');
         } else {
-          logger.error('Database error:', err);
-          throw err;
+          logger.error(`Error saving URL ${url}:`, err);
+          await message.react('❌');
         }
       }
     }
-  } catch (error) {
-    logger.error('Error processing Discord message:', error);
-    try {
-      await message.react('❌');
-      const errorMsg = await message.reply(`Sorry, there was an error saving the URL.\nError occurred at: ${formatTimestamp(new Date())}`);
-      
-      // Delete the error message after a delay
-      try {
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        await errorMsg.delete();
-      } catch (deleteError) {
-        logger.error('Error deleting error message:', deleteError);
-      }
-    } catch (reactionError) {
-      logger.error('Error sending error reaction:', reactionError);
-    }
+  } catch (err) {
+    logger.error('Error processing Discord message:', err);
   }
 });
 
@@ -174,5 +188,22 @@ client.on('warn', info => {
   logger.warn('Discord warning:', info);
 });
 
-// Export the client to be used in the main application
-module.exports = client; 
+// Start the bot
+async function startBot() {
+  try {
+    logger.info('Attempting to start Discord bot...');
+    
+    // Get system user ID before connecting
+    await getSystemUserId();
+    
+    // Connect to Discord
+    await client.login(process.env.DISCORD_BOT_TOKEN);
+    
+    logger.info('Discord bot started successfully');
+  } catch (err) {
+    logger.error('Failed to start Discord bot:', err);
+    process.exit(1);
+  }
+}
+
+module.exports = { startBot, getSystemUserId }; 
