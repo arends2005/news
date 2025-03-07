@@ -45,10 +45,10 @@ let systemUserId = null;
 // Function to get system user ID
 async function getSystemUserId() {
   try {
-    if (systemUserId === null) {
-      systemUserId = await getBotUserId();
-      logger.info(`System user ID set to: ${systemUserId}`);
-    }
+    // Clear the cached system user ID to force a fresh lookup
+    systemUserId = null;
+    systemUserId = await getBotUserId();
+    logger.info(`System user ID set to: ${systemUserId}`);
     return systemUserId;
   } catch (err) {
     logger.error('Error getting system user ID:', err);
