@@ -1,8 +1,26 @@
 -- Insert initial categories if they don't exist
 INSERT INTO categories (name, description) VALUES
-    ('AI Tools', 'Articles about artificial intelligence tools and applications'),
+    ('AI IDE', 'Articles about AI applications'),
+    ('AI Tools', 'Articles about Coding Tools'),
+    ('Coding Agent', 'Articles about AI Coding Agents'),
     ('Crypto', 'Articles about cryptocurrency, blockchain, and digital assets'),
     ('Docker', 'Articles about Docker containers, containerization, and related technologies'),
+    ('Git', 'Articles about Version Control'),
+    ('Crypto Faucets', 'Articles about Crypto Faucets'),
+    ('Hacks', 'Articles about life hacks and such'),
+    ('Health', 'Articles about health and fitness'),
+    ('Plex', 'Articles about Plex, Radarr, Sonarr, and Jellyfin'),
+    ('Python', 'Articles about Python programming language'),
+    ('Raspberry Pi', 'Articles about Raspberry Pi'),
+    ('Repairs', 'Articles about repairs'),
+    ('Security', 'Articles about security and encryption'),
+    ('Self Hosted', 'Articles about self-hosted services'),
+    ('Setup Guides', 'Articles about setup guides'),
     ('Terminal', 'Articles about terminal usage, command line tools, and shell scripting'),
+    ('Tips', 'Articles about tips'),
+    ('Tricks', 'Articles about tricks'),
+    ('ToDo', 'Articles about To do lists'),
+    ('Tutorials', 'Articles about Tutorials'),
+    ('Ubuntu', 'Articles about Ubuntu'),
     ('YouTube', 'Articles about YouTube, video content creation, and platform features')
 ON CONFLICT (name) DO NOTHING; 

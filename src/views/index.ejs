@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>News Article Saver </title>
     <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.css" rel="stylesheet" />
     <style>
         body {
-            padding-top: 56px; /* Height of the navbar */
+            padding-top: 98px; /* Match navbar height */
         }
         .navbar {
             position: fixed;
@@ -20,22 +20,53 @@
             z-index: 1030;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .navbar-dark .navbar-nav .nav-link {
-            color: #007bff !important;
+        .nav-link {
+            color: rgba(0, 26, 255, 0.8) !important;
+            transition: color 0.3s ease;
         }
-        .navbar-dark .navbar-nav .nav-link:hover {
-            color: rgba(0, 123, 255, 0.8) !important;
+        .nav-link:hover {
+            color: #ff0000 !important;
         }
-        .navbar-dark .navbar-brand,
-        .navbar-dark .navbar-text {
-            color: #007bff !important;
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #60ff04 !important;
         }
-        .navbar-toggler {
-            border-color: rgba(255,255,255,.5) !important;
+        .dropdown-menu {
+            margin-top: 0;
+            border-radius: 0.25rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            background-color: #007bff;
+            max-height: 400px;
+            overflow-y: auto;
         }
-        .container {
-            max-width: 1200px;
-            padding-top: 1rem;
+        .dropdown-item {
+            color: #ffffff;
+            padding: 0.25rem 1rem;
+        }
+        .dropdown-item:hover {
+            background-color: rgba(255,255,255,0.1);
+            color: #ffffff;
+        }
+        .dropdown-menu .form-check-label {
+            color: #ffffff;
+            font-size: 0.9rem;
+        }
+        .dropdown-menu.add-article-form {
+            min-width: 320px;
+            padding: 1rem;
+            background-color: #ffffff;
+        }
+        .dropdown-menu.add-article-form .form-control {
+            font-size: 0.9rem;
+        }
+        .dropdown-menu.add-article-form label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #495057;
+        }
+        .dropdown-menu.add-article-form .btn-block {
+            margin-top: 0.5rem;
         }
         .article-item {
             cursor: move;
@@ -62,7 +93,7 @@
         }
         .badge-info {
             background-color: #17a2b8;
-            color: white;
+            color: rgb(255, 255, 255);
             padding: 0.3em 0.6em;
             margin-right: 0.3em;
             margin-bottom: 0.3em;
@@ -100,18 +131,25 @@
         h1 {
             font-size: 1.75rem;
             margin-bottom: 1rem;
+            color: #ff0000;
         }
         h2 {
             font-size: 1.25rem;
             margin-bottom: 0;
         }
+        .welcome-message {
+            color: #49fc03;
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+            display: block;
+            opacity: 0.8;
+        }
+        .welcome-text {
+            color: rgba(250, 0, 0, 0.8);
+            margin-right: 1rem;
+        }
         .list-group-item {
             padding: 0.75rem;
-        }
-        .navbar-brand {
-            font-size: 1.5rem;
-            font-weight: 500;
-            color: #fff !important;
         }
         .dark-mode-switch {
             margin-left: 1rem;
@@ -136,47 +174,15 @@
         .nav-item:hover .dropdown-menu {
             display: block;
         }
-        .dropdown-menu {
-            margin-top: 0;
-            border-radius: 0.25rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            background-color: #007bff;
-        }
-        .dropdown-item {
-            color: #ffffff;
-        }
-        .dropdown-item:hover {
-            background-color: rgba(255,255,255,0.1);
-            color: #ffffff;
-        }
-        .dropdown-menu .form-check-label {
-            color: #ffffff;
-        }
-        .dropdown-menu.add-article-form {
-            min-width: 320px;
-            padding: 1rem;
-            background-color: #ffffff;
-        }
-        .dropdown-menu.add-article-form .form-control {
-            font-size: 0.9rem;
-        }
-        .dropdown-menu.add-article-form label {
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: #495057;
-        }
-        .dropdown-menu.add-article-form .btn-block {
-            margin-top: 0.5rem;
-        }
         /* Dark mode styles */
         :root {
             --bg-color: #ffffff;
             --text-color: #212529;
-            --card-bg: #ffffff;
+            --card-bg: #f31313;
             --border-color: rgba(0,0,0,.125);
         }
         
-        [data-theme="dark"] {
+        [data-bs-theme="dark"] {
             --bg-color: #212529;
             --text-color: #ffffff;
             --card-bg: #343a40;
@@ -189,20 +195,37 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
         
-        [data-theme="dark"] .card {
+        [data-bs-theme="dark"] .card {
             background-color: var(--card-bg);
             border-color: var(--border-color);
         }
         
-        [data-theme="dark"] .list-group-item {
+        [data-bs-theme="dark"] .list-group-item {
             background-color: var(--card-bg);
             border-color: var(--border-color);
             color: var(--text-color);
         }
         
-        [data-theme="dark"] .article-order {
+        [data-bs-theme="dark"] .article-order {
             background-color: #ffffff;
             color: #212529;
+        }
+        /* Dark mode styles for dropdowns */
+        [data-bs-theme="dark"] .dropdown-menu {
+            background-color: #343a40;
+            border-color: #495057;
+        }
+        [data-bs-theme="dark"] .dropdown-menu.add-article-form {
+            background-color: #343a40;
+            border-color: #495057;
+        }
+        [data-bs-theme="dark"] .dropdown-menu.add-article-form label {
+            color: #ffffff;
+        }
+        [data-bs-theme="dark"] .dropdown-menu.add-article-form .form-control {
+            background-color: #212529;
+            border-color: #495057;
+            color: #ffffff;
         }
     </style>
     <script>
@@ -214,20 +237,280 @@
             // Check for saved theme preference
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme) {
-                htmlElement.setAttribute('data-theme', savedTheme);
+                htmlElement.setAttribute('data-bs-theme', savedTheme);
                 darkModeSwitch.checked = savedTheme === 'dark';
             }
             
             // Handle theme switch
             darkModeSwitch.addEventListener('change', function() {
                 const theme = this.checked ? 'dark' : 'light';
-                htmlElement.setAttribute('data-theme', theme);
+                htmlElement.setAttribute('data-bs-theme', theme);
                 localStorage.setItem('theme', theme);
                 
                 // Update moon icon
-                const moonIcon = this.nextElementSibling.querySelector('.fas');
-                moonIcon.classList.toggle('text-warning', this.checked);
+                const moonIcon = this.nextElementSibling.querySelector('.bi');
+                moonIcon.className = this.checked ? 'bi bi-sun' : 'bi bi-moon';
             });
+
+            // Initialize all dropdowns
+            const dropdowns = document.querySelectorAll('.dropdown-toggle');
+            dropdowns.forEach(dropdown => {
+                new bootstrap.Dropdown(dropdown);
+            });
+
+            // Initialize all modals
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                new bootstrap.Modal(modal);
+            });
+
+            // Initialize Sortable for article reordering
+            const articleList = document.getElementById('article-list');
+            if (articleList) {
+                new Sortable(articleList, {
+                    animation: 150,
+                    onEnd: async function(evt) {
+                        const articleId = evt.item.dataset.id;
+                        const newOrder = evt.newIndex + 1;
+                        try {
+                            await axios.post(`/articles/${articleId}/reorder`, { order: newOrder });
+                            window.location.reload();
+                        } catch (error) {
+                            console.error('Error reordering article:', error);
+                        }
+                    }
+                });
+            }
+
+            // Edit Notes Handlers
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const articleItem = this.closest('.article-item');
+                    articleItem.querySelector('.notes-display').style.display = 'none';
+                    articleItem.querySelector('.notes-edit').style.display = 'block';
+                });
+            });
+
+            document.querySelectorAll('.cancel-edit').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const articleItem = this.closest('.article-item');
+                    articleItem.querySelector('.notes-display').style.display = 'block';
+                    articleItem.querySelector('.notes-edit').style.display = 'none';
+                });
+            });
+
+            document.querySelectorAll('.save-notes').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const articleItem = this.closest('.article-item');
+                    const articleId = articleItem.dataset.id;
+                    const notes = articleItem.querySelector('.edit-notes').value;
+                    const categories = Array.from(articleItem.querySelectorAll('.article-category:checked')).map(cb => cb.value);
+
+                    try {
+                        await axios.put(`/articles/${articleId}`, { notes, categories });
+                        window.location.reload();
+                    } catch (error) {
+                        console.error('Error updating article:', error);
+                    }
+                });
+            });
+
+            // Delete Article Handler
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    if (confirm('Are you sure you want to delete this article?')) {
+                        const articleId = this.closest('.article-item').dataset.id;
+                        try {
+                            await axios.delete(`/articles/${articleId}`);
+                            window.location.reload();
+                        } catch (error) {
+                            console.error('Error deleting article:', error);
+                        }
+                    }
+                });
+            });
+
+            // Favorite Toggle Handler
+            document.querySelectorAll('.favorite-toggle').forEach(toggle => {
+                toggle.addEventListener('change', async function() {
+                    const articleId = this.dataset.id;
+                    const favorite = this.checked;
+                    try {
+                        await axios.post(`/articles/${articleId}/favorite`, { favorite });
+                        const starIcon = this.nextElementSibling;
+                        starIcon.classList.toggle('d-none', !favorite);
+                        // Update the title
+                        this.title = favorite ? 'Remove from favorites' : 'Add to favorites';
+                    } catch (error) {
+                        console.error('Error toggling favorite:', error);
+                        // Revert the checkbox if the request failed
+                        this.checked = !favorite;
+                    }
+                });
+            });
+
+            // Export Handlers
+            document.querySelectorAll('[data-format]').forEach(item => {
+                item.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    const format = this.dataset.format;
+                    window.location.href = `/articles/export?format=${format}`;
+                });
+            });
+
+            // Filter Handlers
+            document.querySelectorAll('[data-value]').forEach(item => {
+                item.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    const filter = this.dataset.value;
+                    const selectedCategories = Array.from(document.querySelectorAll('.category-filter:checked')).map(cb => cb.value);
+                    const params = new URLSearchParams();
+                    params.append('filter', filter);
+                    selectedCategories.forEach(cat => params.append('categories', cat));
+                    window.location.href = `/?${params.toString()}`;
+                });
+            });
+
+            // Category Filter Handlers
+            document.querySelectorAll('.category-filter').forEach(filter => {
+                filter.addEventListener('change', async function() {
+                    const selectedCategories = Array.from(document.querySelectorAll('.category-filter:checked')).map(cb => cb.value);
+                    const currentFilter = document.querySelector('#filterDropdown').dataset.value || 'all';
+                    const params = new URLSearchParams();
+                    params.append('filter', currentFilter);
+                    selectedCategories.forEach(cat => params.append('categories', cat));
+                    window.location.href = `/?${params.toString()}`;
+                });
+            });
+
+            // Add Category Handler
+            const addCategoryBtn = document.getElementById('nav-add-category-btn');
+            const addCategoryModal = new bootstrap.Modal(document.getElementById('addCategoryModal'));
+            const saveCategoryBtn = document.getElementById('save-category-btn');
+            const newCategoryInput = document.getElementById('new-category-input');
+
+            if (addCategoryBtn) {
+                addCategoryBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    addCategoryModal.show();
+                });
+            }
+
+            if (saveCategoryBtn) {
+                saveCategoryBtn.addEventListener('click', async function() {
+                    const name = newCategoryInput.value.trim();
+                    if (name) {
+                        try {
+                            const response = await axios.post('/categories', { name });
+                            if (response.data.success) {
+                                // Add the new category to the dropdowns
+                                const category = response.data.category;
+                                const checkboxTemplate = `
+                                    <div class="form-check me-3">
+                                        <input class="form-check-input article-category" 
+                                               type="checkbox" 
+                                               value="${category.id}"
+                                               id="new-article-category-${category.id}">
+                                        <label class="form-check-label" for="new-article-category-${category.id}">
+                                            ${category.name}
+                                        </label>
+                                    </div>
+                                `;
+                                
+                                // Add to the add article form
+                                const addArticleForm = document.querySelector('#add-article-form .category-selection');
+                                if (addArticleForm) {
+                                    addArticleForm.insertAdjacentHTML('beforeend', checkboxTemplate);
+                                }
+                                
+                                // Add to the categories dropdown
+                                const categoriesDropdown = document.querySelector('#categoriesDropdown + .dropdown-menu');
+                                const addCategoryItem = categoriesDropdown.querySelector('#nav-add-category-btn').parentElement;
+                                const navCheckboxTemplate = `
+                                    <div class="dropdown-item">
+                                        <div class="form-check">
+                                            <input class="form-check-input category-filter" 
+                                                   type="checkbox" 
+                                                   value="${category.id}" 
+                                                   id="nav-category-${category.id}">
+                                            <label class="form-check-label" for="nav-category-${category.id}">
+                                                ${category.name}
+                                            </label>
+                                        </div>
+                                    </div>
+                                `;
+                                addCategoryItem.insertAdjacentHTML('beforebegin', navCheckboxTemplate);
+                                
+                                // Clear and close the modal
+                                newCategoryInput.value = '';
+                                addCategoryModal.hide();
+                                
+                                // Show success message
+                                alert('Category added successfully!');
+                            }
+                        } catch (error) {
+                            console.error('Error adding category:', error);
+                            alert('Failed to add category. Please try again.');
+                        }
+                    }
+                });
+            }
+
+            // Add Article Form Handler
+            const addArticleForm = document.getElementById('add-article-form');
+            if (addArticleForm) {
+                addArticleForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const submitButton = this.querySelector('button[type="submit"]');
+                    submitButton.disabled = true;
+                    
+                    const url = this.querySelector('#url').value;
+                    const notes = this.querySelector('#notes').value;
+                    
+                    // Get selected categories from the form
+                    const formCategories = Array.from(
+                        this.querySelectorAll('.article-category:checked')
+                    ).map(checkbox => parseInt(checkbox.value));
+                    
+                    try {
+                        const response = await axios.post('/articles', {
+                            url,
+                            notes,
+                            categories: formCategories
+                        });
+                        
+                        if (!response.data.success) {
+                            throw new Error(response.data.error || 'Failed to save article');
+                        }
+                        
+                        // Clear form
+                        this.reset();
+                        
+                        // Close dropdown using Bootstrap 5
+                        const dropdown = document.getElementById('addArticleDropdown');
+                        const bsDropdown = bootstrap.Dropdown.getInstance(dropdown);
+                        if (bsDropdown) {
+                            bsDropdown.hide();
+                        }
+                        
+                        // Show success message
+                        alert('Article saved successfully!');
+                        
+                        // Wait a moment for the server to process the new article
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                        
+                        // Refresh the page to show the new article
+                        window.location.reload();
+                        
+                    } catch (error) {
+                        console.error('Error:', error);
+                        alert(error.message || 'Failed to save article');
+                    } finally {
+                        submitButton.disabled = false;
+                    }
+                });
+            }
         });
     </script>
 </head>
@@ -235,31 +518,39 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="#">News Article Saver</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ml-auto">
+                <ul class="navbar-nav ms-auto">
+                    <% if (user) { %>
+                        <span class="welcome-text me-3" style="font-size: 1.1rem; color: #002fff;">
+                            Welcome, <%= user.username %>
+                            <% if (user.is_admin) { %>
+                                <span class="admin-badge">Admin</span>
+                            <% } %>
+                        </span>
+                    <% } %>
                     <li class="nav-item">
                         <div class="dark-mode-switch">
                             <div class="form-check form-switch">
                                 <input class="form-check-input" type="checkbox" id="darkModeSwitch">
                                 <label class="form-check-label" for="darkModeSwitch">
-                                    <i class="fas fa-moon"></i>
+                                    <i class="bi bi-moon"></i>
                                 </label>
                             </div>
                         </div>
                     </li>
                     <li class="nav-item">
-                        <a href="/auth/logout" class="btn btn-primary ml-2" style="background-color: #007BFF; border-color: #007BFF;">
-                            <i class="fas fa-sign-out-alt"></i> Logout
+                        <a href="/auth/logout" class="btn btn-primary ms-2">
+                            <i class="bi bi-box-arrow-right"></i> Logout
                         </a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="addArticleDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-plus"></i> Add Article
+                        <a class="nav-link dropdown-toggle" href="#" id="addArticleDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-plus-lg"></i> Add Article
                         </a>
-                        <div class="dropdown-menu dropdown-menu-right add-article-form">
+                        <div class="dropdown-menu dropdown-menu-end add-article-form">
                             <form id="add-article-form" class="px-2">
                                 <div class="mb-3">
                                     <label for="url" class="form-label">Article URL</label>
@@ -274,7 +565,7 @@
                                     <div class="category-selection d-flex flex-wrap">
                                         <% if (locals.categories && categories.length > 0) { %>
                                             <% categories.forEach(category => { %>
-                                                <div class="form-check mr-3">
+                                                <div class="form-check me-3">
                                                     <input class="form-check-input article-category" 
                                                            type="checkbox" 
                                                            value="<%= category.id %>"
@@ -287,41 +578,41 @@
                                         <% } %>
                                     </div>
                                 </div>
-                                <button type="submit" class="btn btn-primary btn-block">Save Article</button>
+                                <button type="submit" class="btn btn-primary w-100">Save Article</button>
                             </form>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="exportDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <i class="fas fa-download"></i> Export
+                        <a class="nav-link dropdown-toggle" href="#" id="exportDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-download"></i> Export
                         </a>
-                        <div class="dropdown-menu dropdown-menu-right">
+                        <div class="dropdown-menu dropdown-menu-end">
                             <a class="dropdown-item" href="#" data-format="json">
-                                <i class="fas fa-file-code"></i> Export as JSON
+                                <i class="bi bi-file-code"></i> Export as JSON
                             </a>
                             <a class="dropdown-item" href="#" data-format="markdown">
-                                <i class="fas fa-file-alt"></i> Export as Markdown
+                                <i class="bi bi-file-text"></i> Export as Markdown
                             </a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="filterDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="#" id="filterDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Filter Articles
                         </a>
-                        <div class="dropdown-menu" aria-labelledby="filterDropdown">
+                        <div class="dropdown-menu dropdown-menu-end">
                             <a class="dropdown-item" href="#" data-value="all">All Articles</a>
                             <a class="dropdown-item" href="#" data-value="favorites">
-                                Starred Articles <i class="fas fa-star text-warning"></i>
+                                Starred Articles <i class="bi bi-star-fill text-warning"></i>
                             </a>
                             <a class="dropdown-item" href="#" data-value="newest">Newest First</a>
                             <a class="dropdown-item" href="#" data-value="oldest">Oldest First</a>
                         </div>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="#" id="categoriesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Categories
                         </a>
-                        <div class="dropdown-menu" aria-labelledby="categoriesDropdown">
+                        <div class="dropdown-menu dropdown-menu-end" style="max-height: 400px; overflow-y: auto;">
                             <% if (locals.categories && categories.length > 0) { %>
                                 <% categories.forEach(category => { %>
                                     <div class="dropdown-item">
@@ -329,7 +620,8 @@
                                             <input class="form-check-input category-filter" 
                                                    type="checkbox" 
                                                    value="<%= category.id %>" 
-                                                   id="nav-category-<%= category.id %>">
+                                                   id="nav-category-<%= category.id %>"
+                                                   <%= locals.query && locals.query.categories && locals.query.categories.includes(category.id.toString()) ? 'checked' : '' %>>
                                             <label class="form-check-label" for="nav-category-<%= category.id %>">
                                                 <%= category.name %>
                                             </label>
@@ -339,7 +631,7 @@
                                 <div class="dropdown-divider"></div>
                             <% } %>
                             <a class="dropdown-item" href="#" id="nav-add-category-btn">
-                                <i class="fas fa-plus"></i> Add Category
+                                <i class="bi bi-plus-lg"></i> Add Category
                             </a>
                         </div>
                     </li>
@@ -349,6 +641,11 @@
     </nav>
 
     <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h1>News Articles</h1>
+            </div>
+        </div>
         <div class="row">
             <div class="col-12">
                 <div class="card">
@@ -442,14 +739,12 @@
     </div>
 
     <!-- Add Category Modal -->
-    <div class="modal fade" id="addCategoryModal" tabindex="-1" role="dialog" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+    <div class="modal fade" id="addCategoryModal" tabindex="-1" aria-labelledby="addCategoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="addCategoryModalLabel">Add New Category</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
@@ -457,17 +752,16 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-primary" id="save-category-btn">Save Category</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="/js/scripts.js"></script>
 </body>
 </html>

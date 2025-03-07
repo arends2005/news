@@ -3,9 +3,7 @@ const categoryRoutes = require('./categoryRoutes');
 const { isAuthenticated } = require('../middleware/auth');
 
 module.exports = (app, pool) => {
-  // Auth routes are handled separately in app.js
-
-  // Protect all routes below with authentication
+  // Protect all routes with authentication
   app.use(isAuthenticated);
 
   // Home page - displays all articles

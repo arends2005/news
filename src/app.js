@@ -124,11 +124,18 @@ async function initializeApp() {
             throw new Error('Failed to create admin user. Please check environment variables.');
         }
 
-        // Set up bot user ID to use admin user
-        await pool.query(
-            'INSERT INTO settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO UPDATE SET value = $2',
-            ['bot_user_id', adminUser.id.toString()]
-        );
+        // Check if bot user ID exists in settings
+        const botUserResult = await pool.query('SELECT value FROM settings WHERE key = $1', ['bot_user_id']);
+        if (botUserResult.rows.length === 0) {
+            // Only set the bot user ID if it doesn't exist
+            await pool.query(
+                'INSERT INTO settings (key, value) VALUES ($1, $2)',
+                ['bot_user_id', adminUser.id.toString()]
+            );
+            console.log('Initial bot user ID set to admin user:', adminUser.id);
+        } else {
+            console.log('Bot user ID already exists:', botUserResult.rows[0].value);
+        }
 
         // Start the Discord bot
         logger.info('Attempting to start Discord bot...');
@@ -167,7 +174,9 @@ app.use(session({
   saveUninitialized: false,
   cookie: {
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+    maxAge: 2 * 60 * 60 * 1000, // 2 hours
+    httpOnly: true, // Prevents client-side access to the cookie
+    sameSite: 'strict' // Protects against CSRF
   }
 }));
 
@@ -243,8 +252,14 @@ app.use('/auth', (req, res, next) => {
 
 // Routes
 app.use('/auth', authRoutes);
-app.use('/admin', adminRoutes);
 routes(app, pool);
+app.use('/admin', adminRoutes);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error:', err);
+  res.status(500).json({ success: false, error: 'Internal server error' });
+});
 
 // Initialize the application
 initializeApp();

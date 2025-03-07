@@ -25,7 +25,12 @@ async function getBotUserId() {
   try {
     const result = await pool.query('SELECT value FROM settings WHERE key = $1', ['bot_user_id']);
     if (result.rows.length > 0) {
-      return parseInt(result.rows[0].value);
+      const userId = parseInt(result.rows[0].value);
+      // Verify the user exists
+      const userResult = await pool.query('SELECT id FROM users WHERE id = $1', [userId]);
+      if (userResult.rows.length > 0) {
+        return userId;
+      }
     }
     // Fallback to environment variable
     return parseInt(process.env.BOT_USER_ID) || 1;
@@ -35,17 +40,15 @@ async function getBotUserId() {
   }
 }
 
-let systemUserId = 1;
+let systemUserId = null;
 
 // Function to get system user ID
 async function getSystemUserId() {
   try {
-    systemUserId = await getBotUserId();
-    const result = await pool.query('SELECT id FROM users WHERE id = $1', [systemUserId]);
-    if (result.rows.length === 0) {
-      throw new Error('System user not found');
+    if (systemUserId === null) {
+      systemUserId = await getBotUserId();
+      logger.info(`System user ID set to: ${systemUserId}`);
     }
-    logger.info(`System user ID updated to: ${systemUserId}`);
     return systemUserId;
   } catch (err) {
     logger.error('Error getting system user ID:', err);

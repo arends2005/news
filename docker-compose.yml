@@ -2,7 +2,7 @@ services:
   web:
     build: .
     ports:
-      - "3000:3000"
+      - "3000:3000" # "3020:3000" # Changed host port to 3020 because 3000 was already being used by another container on NGINX Proxy Manager
     volumes:
       - ./src:/usr/src/app/src
     env_file:

@@ -3,8 +3,10 @@ let selectedCategories = new Set();
 
 document.addEventListener('DOMContentLoaded', () => {
   // Prevent dropdown from closing when clicking inside
-  $(document).on('click', '.dropdown-menu', function (e) {
-    e.stopPropagation();
+  document.querySelectorAll('.dropdown-menu').forEach(menu => {
+    menu.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
   });
 
   // Initialize dropdown
@@ -34,27 +36,25 @@ document.addEventListener('DOMContentLoaded', () => {
         ).map(checkbox => parseInt(checkbox.value));
         
         try {
-          const response = await fetch('/articles', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json'
-            },
-            body: JSON.stringify({ url, notes, categories: formCategories })
+          const response = await axios.post('/articles', {
+            url,
+            notes,
+            categories: formCategories
           });
           
-          const data = await response.json();
-          
-          if (!data.success) {
-            throw new Error(data.error || 'Failed to save article');
+          if (!response.data.success) {
+            throw new Error(response.data.error || 'Failed to save article');
           }
           
           // Clear form
           this.reset();
           
-          // Close dropdown using jQuery
-          $('#addArticleDropdown').dropdown('hide');
-          $('.dropdown-menu').removeClass('show');
+          // Close dropdown using Bootstrap 5
+          const dropdown = document.getElementById('addArticleDropdown');
+          const bsDropdown = bootstrap.Dropdown.getInstance(dropdown);
+          if (bsDropdown) {
+            bsDropdown.hide();
+          }
           
           // Show success message
           alert('Article saved successfully!');
@@ -62,10 +62,8 @@ document.addEventListener('DOMContentLoaded', () => {
           // Wait a moment for the server to process the new article
           await new Promise(resolve => setTimeout(resolve, 500));
           
-          // Refresh articles list
-          const currentFilter = document.querySelector('#filterDropdown').dataset.value || 'all';
-          const selectedCategories = Array.from(document.querySelectorAll('.category-filter:checked')).map(cb => cb.value);
-          await filterArticles(currentFilter, selectedCategories);
+          // Refresh the page to show the new article
+          window.location.reload();
           
         } catch (error) {
           console.error('Error:', error);

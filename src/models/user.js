@@ -8,9 +8,9 @@ const pool = new Pool({
 
 // Default categories for new users
 const defaultCategories = [
-  'AI IDE', 'AI Tools', 'Terminal', 'Ubuntu', 'Tutorials',
-  'Tips', 'Tricks', 'Hacks', 'Docker', 'Coding Agent',
-  'Python', 'Git', 'Crypto'
+  'AI IDE', 'AI Tools', 'Coding Agent', 'Crypto', 'Docker', 'Git', 'Crypto Faucets', 'Hacks', 'Health', 'Plex',
+  'Python', 'Raspberry Pi', 'Repairs', 'Security', 'Self Hosted', 'Setup Guides', 'Terminal',
+  'Tips', 'Tricks', 'ToDo', 'Tutorials', 'Ubuntu', 'YouTube'
 ];
 
 class User {

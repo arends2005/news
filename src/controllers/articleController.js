@@ -53,7 +53,8 @@ const getArticles = (pool) => async (req, res) => {
       res.render('index', { 
         articles: articlesResult.rows,
         categories: categoriesResult.rows,
-        currentFilter: req.query.filter || 'all'
+        currentFilter: req.query.filter || 'all',
+        query: req.query
       });
     }
   } catch (err) {
