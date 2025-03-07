@@ -9,10 +9,10 @@ const addCategory = (pool) => async (req, res) => {
       return res.status(400).json({ success: false, error: 'Category name is required' });
     }
 
-    // First check if category exists
+    // First check if category exists for this user
     const existingCategory = await pool.query(
-      'SELECT * FROM categories WHERE LOWER(name) = LOWER($1)',
-      [name.trim()]
+      'SELECT * FROM categories WHERE LOWER(name) = LOWER($1) AND user_id = $2',
+      [name.trim(), req.user.id]
     );
 
     if (existingCategory.rows.length > 0) {
@@ -24,8 +24,8 @@ const addCategory = (pool) => async (req, res) => {
     }
 
     const result = await pool.query(
-      'INSERT INTO categories (name) VALUES ($1) RETURNING *',
-      [name.trim()]
+      'INSERT INTO categories (name, user_id) VALUES ($1, $2) RETURNING *',
+      [name.trim(), req.user.id]
     );
 
     logger.info(`Category added successfully: ${JSON.stringify(result.rows[0])}`);
@@ -42,7 +42,7 @@ const addCategory = (pool) => async (req, res) => {
 
 const getCategories = (pool) => async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM categories ORDER BY name ASC');
+    const result = await pool.query('SELECT * FROM categories WHERE user_id = $1 ORDER BY name ASC', [req.user.id]);
     res.json({ success: true, categories: result.rows });
   } catch (err) {
     logger.error(`Error fetching categories: ${err}`);

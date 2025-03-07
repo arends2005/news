@@ -405,6 +405,8 @@
                             if (response.data.success) {
                                 // Add the new category to the dropdowns
                                 const category = response.data.category;
+                                
+                                // Template for category checkbox
                                 const checkboxTemplate = `
                                     <div class="form-check me-3">
                                         <input class="form-check-input article-category" 
@@ -441,12 +443,31 @@
                                 `;
                                 addCategoryItem.insertAdjacentHTML('beforebegin', navCheckboxTemplate);
                                 
+                                // Add to all article edit forms
+                                document.querySelectorAll('.notes-edit .category-selection').forEach(selection => {
+                                    const editCheckboxTemplate = `
+                                        <div class="form-check mr-3">
+                                            <input class="form-check-input article-category" 
+                                                   type="checkbox" 
+                                                   value="${category.id}"
+                                                   id="category-${selection.closest('.article-item').dataset.id}-${category.id}">
+                                            <label class="form-check-label" for="category-${selection.closest('.article-item').dataset.id}-${category.id}">
+                                                ${category.name}
+                                            </label>
+                                        </div>
+                                    `;
+                                    selection.insertAdjacentHTML('beforeend', editCheckboxTemplate);
+                                });
+                                
                                 // Clear and close the modal
                                 newCategoryInput.value = '';
                                 addCategoryModal.hide();
                                 
                                 // Show success message
                                 alert('Category added successfully!');
+                                
+                                // Refresh the page to ensure all UI elements are properly updated
+                                window.location.reload();
                             }
                         } catch (error) {
                             console.error('Error adding category:', error);
