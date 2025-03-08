@@ -15,10 +15,10 @@
       right: 0;
       left: 0;
       z-index: 1030;
-      height: 98px;
+      min-height: auto;
     }
     body {
-      padding-top: 98px; /* Match navbar height */
+      padding-top: 98px;
     }
     .navbar-brand {
       color: #fff !important;
@@ -76,6 +76,34 @@
     }
     [data-bs-theme="dark"] .card-body {
       color: #fff;
+    }
+    /* Add responsive navbar styles */
+    @media (max-width: 991.98px) {
+      .navbar-collapse {
+        background-color: var(--bg-primary, #343a40);
+        padding: 1rem;
+        border-radius: 0.25rem;
+        margin-top: 0.5rem;
+      }
+      
+      .navbar-nav {
+        gap: 0.5rem;
+      }
+
+      .dropdown-menu {
+        position: static !important;
+        float: none;
+        width: 100%;
+        margin-top: 0.5rem;
+      }
+
+      .dark-mode-toggle {
+        margin: 0.5rem 0;
+      }
+
+      .nav-item {
+        width: 100%;
+      }
     }
   </style>
 </head>
