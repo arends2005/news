@@ -670,7 +670,11 @@
                     <% if (user) { %>
                         <li class="nav-item">
                             <span class="welcome-text nav-link">
-                                Welcome, <%= user.username %>
+                                <% if (user.is_admin) { %>
+                                    <a href="/admin" style="text-decoration: none;">Welcome, <%= user.username %></a>
+                                <% } else { %>
+                                    Welcome, <%= user.username %>
+                                <% } %>
                                 <% if (user.is_admin) { %>
                                     <span class="admin-badge">Admin</span>
                                 <% } %>
